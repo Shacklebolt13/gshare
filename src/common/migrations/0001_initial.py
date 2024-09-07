@@ -5,18 +5,18 @@ from django.db import migrations
 from django.utils import timezone
 
 
+def create_superuser(apps, schema_editor):
+    User.objects.create_superuser(
+        username="admin",
+        email="admin@localhost",
+        password="admin",
+        last_login=timezone.now(),
+    )
+
+
 class Migration(migrations.Migration):
 
     dependencies = []
 
     # create a superuser
-    operations = [
-        migrations.RunPython(
-            lambda apps, schema_editor: User.objects.create_superuser(
-                username="admin",
-                email="admin@localhost",
-                password="admin",
-                last_login=timezone.now(),
-            )
-        )
-    ]
+    operations = [migrations.RunPython(create_superuser)]
