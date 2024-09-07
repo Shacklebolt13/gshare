@@ -12,6 +12,9 @@ Django = "^5.1.1"
 psycopg2-binary = "^2.9.9"
 pyright = "^1.1.379"
 djangorestframework = "^3.15.2"
+celery = "^5.4.0"
+django-celery-results = "^2.5.1"
+django-redis = "^5.4.0"
 
 
 [tool.poetry.group.dev.dependencies]

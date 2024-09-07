@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get("GSHARE_BE_SECRET_KEY")
 DEBUG = os.environ.get("GSHARE_BE_DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = (
-    os.environ.get("GSHARE_BE_ALLOWED_HOSTS", "").split(",") if not DEBUG else ["*"]
+    ["*"] if DEBUG else os.environ.get("GSHARE_BE_ALLOWED_HOSTS", "").split(",")
 )
 
 
@@ -44,6 +44,8 @@ DJANGO_INTERNAL_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "celery",
+    "django_celery_results",
 ]
 
 OPTIONAL_APPS = [
@@ -103,11 +105,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("GSHARE_BE_DB_NAME", "gshare"),
-        "USER": os.environ.get("GSHARE_BE_DB_USER", "gshareadmin"),
-        "PASSWORD": os.environ.get("GSHARE_BE_DB_PASSWORD", "gsharedefault"),
-        "HOST": os.environ.get("GSHARE_BE_DB_HOST", "localhost"),
-        "PORT": os.environ.get("GSHARE_BE_DB_PORT", "5432"),
+        "NAME": os.environ.get("POSTGRES_DB", "gshare"),
+        "USER": os.environ.get("POSTGRES_USER", "gshareadmin"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "gsharedefault"),
+        "HOST": os.environ.get("POSTGRES_DB_HOST", "localhost"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
 
@@ -154,3 +156,18 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Celery Configuration Options
+CELERY_TIMEZONE = "Asia/Kolkata"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+# CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
+CELERY_CACHE_BACKEND = "default"
+CELERY_RESULT_EXTENDED = True
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+    }
+}
