@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from .models import Job, JobStatus
 
 
-class BeginUploadJob(APIView):
+class JobApiView(APIView):
 
     def get(self, request):
         class GetJobSerializer(serializers.Serializer):

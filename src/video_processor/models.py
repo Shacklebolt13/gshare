@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 from src.common.models import BaseModel
@@ -5,6 +7,9 @@ from src.common.models import BaseModel
 
 # Create your models here.
 class Video(models.Model):
+    id: models.UUIDField = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False
+    )
     job: models.ForeignKey = models.ForeignKey("files.Job", on_delete=models.PROTECT)
 
 

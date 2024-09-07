@@ -16,15 +16,27 @@ Including another URLconf
 """
 
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from rest_framework import routers
 
 from src.files import api as file_api
+from src.video_processor import api as video_api
 
+router = routers.DefaultRouter()
+router.register(r"/video", video_api.SubtitleViewSet)
+
+router
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("/job", file_api.BeginUploadJob.as_view()),
+    path("/admin", admin.site.urls),
+    path("/job", file_api.JobApiView.as_view()),
+    path("/video", video_api.VideoApiView.as_view()),
+    path("/subtitle", include(router.urls)),
 ]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     from debug_toolbar.toolbar import debug_toolbar_urls  # type: ignore
