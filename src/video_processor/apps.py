@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class FilemanagerConfig(AppConfig):
+class VideoProcessorConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "src.filemanager"
+    name = "src.video_processor"

@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,15 +33,37 @@ ALLOWED_HOSTS = (
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_INTERNAL_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "src.administrator",
-    "src.filemanager",
+]
+
+THIRD_PARTY_APPS = [
+    "rest_framework",
+]
+
+OPTIONAL_APPS = [
+    "debug_toolbar",
+]
+
+LOCAL_APPS = [
+    "src.common",
+    "src.files",
+    "src.video_processor",
+]
+INSTALLED_APPS = [
+    *DJANGO_INTERNAL_APPS,
+    *THIRD_PARTY_APPS,
+    *(OPTIONAL_APPS if DEBUG else []),
+    *LOCAL_APPS,
+]
+
+OPTIONAL_MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 MIDDLEWARE = [
@@ -52,6 +74,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    *(OPTIONAL_MIDDLEWARE if DEBUG else []),
 ]
 
 ROOT_URLCONF = "config.urls"

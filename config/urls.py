@@ -15,9 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path
 
+from src.files import api as file_api
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("/job", file_api.BeginUploadJob.as_view()),
 ]
+
+if settings.DEBUG:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns.extend(debug_toolbar_urls())
