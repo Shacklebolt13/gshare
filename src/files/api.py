@@ -25,6 +25,7 @@ class JobApiView(APIView):
     def post(self, request):
         class CreateJobSerializer(serializers.Serializer):
             file = serializers.FileField()
+            title = serializers.CharField(max_length=100)
 
         class JobResponseSerializer(serializers.ModelSerializer):
             class Meta:
@@ -33,7 +34,11 @@ class JobApiView(APIView):
 
         serializer = CreateJobSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        uploadJob = serializer.save()
+        uploadJob = Job.objects.create(
+            title=serializer.validated_data["title"],
+            file=serializer.validated_data["file"],
+            status=JobStatus.PENDING.value,
+        )
         return Response(
             JobResponseSerializer(uploadJob).data, status=status.HTTP_201_CREATED
         )

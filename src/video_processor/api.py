@@ -21,7 +21,7 @@ class ListVideoApiView(ListAPIView):
 
         class Meta:
             model = Video
-            fields = ["job"]
+            fields = ["job", "id"]
 
     serializer_class = VideoSerializer
     queryset = Video.objects.all()
@@ -32,9 +32,7 @@ class SubtitleViewSet(ReadOnlyModelViewSet):
         class Meta:
             model = Subtitle
             fields = [
-                "id",
                 "video",
-                "file",
                 "sequence",
                 "language",
                 "description",

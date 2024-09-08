@@ -20,5 +20,5 @@ class Subtitle(BaseModel):
     sequence: models.IntegerField = models.IntegerField()
     language: models.CharField = models.CharField(max_length=20)
     description: models.TextField = models.TextField()
-    start_time: models.DateTimeField = models.DateTimeField()
-    end_time: models.DateTimeField = models.DateTimeField()
+    start_time: models.IntegerField = models.IntegerField(default=0)
+    end_time: models.IntegerField = models.IntegerField(default=0)

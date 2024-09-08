@@ -1,0 +1,166 @@
+{% extends 'common/base.html' %}
+{% load static %}
+{% block headers_override %}
+<script src="{% static 'video_processor/main.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid border row" style="min-height: 90%;padding: 0%;margin:0%">
+  <div id="video-list" class="col border list-group" style="max-width:20%;padding: 0%;">
+    <div class="text-center text-secondary">Select one to begin</div>
+  </div>
+  <div class="col border" style="width: 80% padding:0%">
+    <div class="container border" style="margin: 0%;height:100%;">
+      <span style="height: 50%;width: 100%">
+        <video-js id="video-player" class="video-js" controls preload="auto" data-setup="{}"></video-js>
+      </span>
+      <div class="container" style="height: 50%;padding: 0%;width: 100%">
+        <nav class="navbar" style="padding: 0%; margin-top: 1%;margin-bottom: 1%;">
+          <div class="container-fluid flex ">
+            <div id="error-text"class="d-flex text-danger">
+
+            </div>
+            <div class="d-flex" role="search">
+              <input class="form-control me-2" id="subtitle-search-term" name="search_term" placeholder="Search Subtitles (min 2 chars)"
+                onkeydown="searchTerm()">
+            </div>
+          </div>
+        </nav>
+        <ul id="subtitle-list" class="list-group border" style="max-height: 80%;width: 100%;overflow-y :scroll">
+          <li class="list-group-item" style="width: 100%;">Select a video on the left side or create one</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal modal-lg fade" id="upload-video-modal"  aria-labelledby="upload-video-modal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Upload Video</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="name-input" class="form-label">Video Title</label>
+          <input class="form-control" id="name-input" name="title">
+        </div>
+        <div>
+          <label for="file-input" class="form-label">Upload A Video</label>
+          <input class="form-control form-control-lg" id="file-input" type="file" name="file">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="upload-video-submit" type="button" class="btn btn-primary" onclick="uploadVideo()">Upload Video</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    var list_video_url = "{% url 'video-list' %}"
+    //get the list of videos
+    $.getJSON(list_video_url, function (data) {
+      for (index in data) {
+        var object = data[index]
+        var job = object.job
+        var video_title = job.title
+        var video_id = job.id
+        var video_url = job.file
+
+        //append div to the list
+        var video_div = $('<div></div>')
+        video_div.addClass('list-group-item btn text-start border')
+        video_div.text(video_title)
+        video_div.attr('data-video-id', object.id)
+        video_div.attr('data-video-url', video_url)
+        video_div.click(selectVideo)
+        $('#video-list').append(video_div)
+      }
+    })
+  })
+
+  function selectVideo(){
+    var video_id = $(this).attr('data-video-id')
+    var video_url = $(this).attr('data-video-url')
+    loadVideo(video_id,video_url)
+  }
+
+  function searchTerm(){
+    var search_term = $('#subtitle-search-term').val()
+    var video_player_dom = $("#video-player")
+    var video_id = video_player_dom.attr('data-video-id')
+    listSubtitles(video_id,search_term)
+  }
+
+  function seekToSubtitle(){
+    var start_time = $(this).attr('data-start-time')
+    var player = videojs('video-player')
+    player.currentTime(start_time)
+  }
+
+  function loadVideo(video_id,video_url) {
+    //set up the player with the video url
+    var player = videojs('video-player')
+    player.src(video_url)
+    var video_player_dom = $("#video-player")
+    video_player_dom.attr('data-video-id', video_id)
+
+    //get the list of subtitles
+    listSubtitles(video_id)
+  }
+
+  function listSubtitles(video_id,search_term) {
+    var list_subtitle_url = "{% url 'subtitle-list' %}"
+    $.getJSON(list_subtitle_url, { video_id: video_id, search : search_term }, function (data) {
+      $('#subtitle-list').empty()
+      for (index in data) {
+        var object = data[index]
+        var description = object.description
+        var start_time = object.start_time
+        //var end_time = object.end_time
+
+        //append div to the list
+        var subtitle_div = $('<li></li>')
+        subtitle_div.addClass('list-group-item')
+        subtitle_div.text(description)
+        subtitle_div.attr('data-start-time', start_time)
+        subtitle_div.style = "width: 100%;"
+
+        $('#subtitle-list').append(subtitle_div)
+      }
+    })
+  }
+
+  //make a post call
+  function uploadVideo() {
+    var name = $('#name-input').val()
+    var file = $('#file-input')[0].files[0]
+    var upload_video_url = "{% url 'create-job' %}"
+    var form_data = new FormData()
+    form_data.append('title', name)
+    form_data.append('file', file)
+
+    $.ajax({
+      url: upload_video_url,
+      type: 'POST',
+      data: form_data,
+      processData: false,
+      contentType: false,
+      success: function (data) {
+        //reload the page
+        location.reload()
+      },
+      error: function (data) {
+        console.log(data)
+      }
+    })
+  }
+
+</script>
+{% endblock %}

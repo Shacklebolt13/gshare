@@ -21,7 +21,6 @@ class Job(common_models.BaseModel):
         primary_key=True, default=uuid.uuid4, editable=False
     )
     title: models.CharField = models.CharField(max_length=100)
-    uploaded_by: models.GenericIPAddressField = models.GenericIPAddressField()
     file = models.FileField(upload_to="raw", null=True, blank=True)
     status: models.CharField = models.CharField(
         max_length=10, default="Pending", choices=JobStatus.choices()
