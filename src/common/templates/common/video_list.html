@@ -17,11 +17,12 @@
       <div class="container" style="height: 50%;padding: 0%;width: 100%">
         <nav class="navbar" style="padding: 0%; margin-top: 1%;margin-bottom: 1%;">
           <div class="container-fluid flex ">
-            <div id="error-text"class="d-flex text-danger">
-
+            <div class="d-flex">
+              <button class="btn btn-outline-primary" id="logs-btn">Log file</button>
+              <button class="btn btn-outline-primary" id="srt-btn">Subtitle file</button>
             </div>
             <div class="d-flex" role="search">
-              <input class="form-control me-2" id="subtitle-search-term" name="search_term" placeholder="Search Subtitles (min 2 chars)"
+              <input class="form-control me-2" id="subtitle-search-term" name="search_term" placeholder="Search Subtitles"
                 onkeydown="searchTerm()">
             </div>
           </div>
@@ -48,7 +49,7 @@
         </div>
         <div>
           <label for="file-input" class="form-label">Upload A Video</label>
-          <input class="form-control form-control-lg" id="file-input" type="file" name="file">
+          <input class="form-control form-control-lg" id="file-input" type="file" name="file" accept="video/*">
         </div>
       </div>
       <div class="modal-footer">
@@ -63,23 +64,31 @@
 {% block scripts %}
 <script>
   $(document).ready(function () {
-    var list_video_url = "{% url 'video-list' %}"
+    var list_video_url = "{% url 'video' %}"
     //get the list of videos
     $.getJSON(list_video_url, function (data) {
       for (index in data) {
-        var object = data[index]
-        var job = object.job
+        var job = data[index]
         var video_title = job.title
         var video_id = job.id
         var video_url = job.file
+        var status = (job.status.toUpperCase() == "COMPLETED")
+        var logs = job.logs
+        var subtitles = job.subtitles
+        console.log(status, job.status.toUpperCase(), job.status.toUpperCase() == "COMPLETED")
 
         //append div to the list
         var video_div = $('<div></div>')
         video_div.addClass('list-group-item btn text-start border')
-        video_div.text(video_title)
-        video_div.attr('data-video-id', object.id)
+        video_div.text(video_title  + (status ? "" : "- Processing"))
+        video_div.attr('data-video-id', job.id)
         video_div.attr('data-video-url', video_url)
-        video_div.click(selectVideo)
+        video_div.attr('data-video-status', status)
+        video_div.attr('data-video-logs', logs)
+        video_div.attr('data-video-subtitles', subtitles)
+        if (status) {
+          video_div.click(selectVideo)
+        }
         $('#video-list').append(video_div)
       }
     })
@@ -88,7 +97,14 @@
   function selectVideo(){
     var video_id = $(this).attr('data-video-id')
     var video_url = $(this).attr('data-video-url')
-    loadVideo(video_id,video_url)
+    var video_status = $(this).attr('data-video-status')
+    var video_logs = $(this).attr('data-video-logs')
+    var video_subtitles = $(this).attr('data-video-subtitles')
+    loadVideo(video_id,video_url,video_status,video_logs,video_subtitles)
+  }
+
+  function downloadFile(){
+    var file_url = $(this).attr('data-file-url')
   }
 
   function searchTerm(){
@@ -104,7 +120,7 @@
     player.currentTime(start_time)
   }
 
-  function loadVideo(video_id,video_url) {
+  function loadVideo(video_id,video_url,video_status,video_logs,video_subtitles){
     //set up the player with the video url
     var player = videojs('video-player')
     player.src(video_url)
@@ -113,6 +129,23 @@
 
     //get the list of subtitles
     listSubtitles(video_id)
+
+    logs_button = $('#logs-btn')
+    srt_button = $('#srt-btn')
+    console.log(video_logs != null && video_subtitles != undefined)
+    if(video_logs != null && video_subtitles != undefined){
+      logs_button.removeAttr('disabled')
+      logs_button.attr('data-file-url', null)
+    }else{
+      logs_button.attr('disabled', true)
+    }
+
+    if(video_subtitles != null && video_subtitles != undefined){
+      srt_button.removeAttr('disabled')
+      srt_button.attr('data-file-url', null)
+    }else{
+      srt_button.attr('disabled', true)
+    }
   }
 
   function listSubtitles(video_id,search_term) {
@@ -141,7 +174,7 @@
   function uploadVideo() {
     var name = $('#name-input').val()
     var file = $('#file-input')[0].files[0]
-    var upload_video_url = "{% url 'create-job' %}"
+    var upload_video_url = "{% url 'video' %}"
     var form_data = new FormData()
     form_data.append('title', name)
     form_data.append('file', file)

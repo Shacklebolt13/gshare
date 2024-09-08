@@ -22,7 +22,6 @@ from django.urls import include, path
 from rest_framework import routers
 
 from src.common import views as common_views
-from src.files import api as file_api
 from src.video_processor import api as video_api
 
 router = routers.DefaultRouter()
@@ -31,8 +30,7 @@ router.register("", video_api.SubtitleViewSet, basename="subtitle")
 urlpatterns = [
     path("admin", admin.site.urls),
     # Api endpoints
-    path("job", file_api.JobApiView.as_view(), name="create-job"),
-    path("video", video_api.ListVideoApiView.as_view(), name="video-list"),
+    path("video", video_api.ListVideoApiView.as_view(), name="video"),
     path("subtitle", include(router.urls)),
     # Views
     path("", common_views.list_videos),

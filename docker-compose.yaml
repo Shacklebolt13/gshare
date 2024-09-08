@@ -1,7 +1,7 @@
 services:
   backend:
     container_name: gshare-backend
-    command: sh ./entrypoint.sh
+    command: sh ./entrypoints/backend.sh
     build : .
     ports:
       - "8000:8000"
@@ -9,16 +9,19 @@ services:
       - .:/app
     depends_on:
       - postgres
+      - redis
     env_file:
       - .env
 
   worker:
     container_name: gshare-worker
+    command: sh ./entrypoints/celery.sh
     build : .
     volumes:
       - .:/app
     depends_on:
       - postgres
+      - redis
     env_file:
       - .env
 
