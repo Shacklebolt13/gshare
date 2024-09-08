@@ -1,3 +1,4 @@
+from django.apps import apps
 from rest_framework import serializers
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
@@ -6,12 +7,21 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from .models import Subtitle, Video
 
+Job = apps.get_model("files", "Job")
 
-class VideoApiView(ListAPIView):
+
+class ListVideoApiView(ListAPIView):
     class VideoSerializer(ModelSerializer):
+        class JobSerializer(ModelSerializer):
+            class Meta:
+                model = Job
+                fields = ["id", "title", "status", "file"]
+
+        job = JobSerializer()
+
         class Meta:
             model = Video
-            fields = ["job.id", "job.title", "job.file"]
+            fields = ["job"]
 
     serializer_class = VideoSerializer
     queryset = Video.objects.all()
@@ -35,6 +45,7 @@ class SubtitleViewSet(ReadOnlyModelViewSet):
     serializer_class = SubtitleSerializer
     filter_backends = [SearchFilter]
     search_fields = ["description"]
+    model = Subtitle
 
     def get_queryset(self):
         class GetSubtitleSerializer(Serializer):

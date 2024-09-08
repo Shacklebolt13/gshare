@@ -23,22 +23,36 @@ from rest_framework import routers
 
 from src.files import api as file_api
 from src.video_processor import api as video_api
+from src.video_processor import views as video_views
 
 router = routers.DefaultRouter()
-router.register(r"/video", video_api.SubtitleViewSet)
+router.register("", video_api.SubtitleViewSet, basename="subtitle")
 
-router
 urlpatterns = [
-    path("/admin", admin.site.urls),
-    path("/job", file_api.JobApiView.as_view()),
-    path("/video", video_api.VideoApiView.as_view()),
-    path("/subtitle", include(router.urls)),
+    path("admin", admin.site.urls),
+    # Api endpoints
+    path("job", file_api.JobApiView.as_view(), name="job-api"),
+    path("video", video_api.ListVideoApiView.as_view(), name="video-list"),
+    path("subtitle", include(router.urls)),
+    # Views
+    path("", video_views.list_videos),
+    path("<slug:video_id>", video_views.get_video),
 ]
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns.extend(
+    static(
+        settings.STATIC_URL,
+        document_root=settings.STATIC_ROOT,
+    )
+)
+urlpatterns.extend(
+    static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+    )
+)
 
-if settings.DEBUG:
+if settings.DEBUG == True:
     from debug_toolbar.toolbar import debug_toolbar_urls  # type: ignore
 
     urlpatterns.extend(debug_toolbar_urls())
