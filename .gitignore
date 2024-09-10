@@ -4,7 +4,8 @@ __pycache__/
 *$py.class
 *.vscode/
 static/
-media/*
+media/logs/*
+media/raw/*
 # C extensions
 *.so
 

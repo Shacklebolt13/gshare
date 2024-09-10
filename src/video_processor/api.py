@@ -1,7 +1,10 @@
 from django.apps import apps
 from rest_framework import serializers
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
@@ -44,8 +47,27 @@ class SubtitleViewSet(ReadOnlyModelViewSet):
     def get_queryset(self):
         class GetSubtitleSerializer(Serializer):
             video_id = serializers.UUIDField()
+            language = serializers.CharField()
 
         serializer = GetSubtitleSerializer(data=self.request.query_params)
         serializer.is_valid(raise_exception=True)
         video_id = serializer.validated_data["video_id"]
-        return Subtitle.objects.filter(video_id=video_id)
+        language = serializer.validated_data["language"]
+        return Subtitle.objects.filter(video_id=video_id, language=language)
+
+    @action(detail=False, url_name="languages", url_path="languages")
+    def get_languages(self, request: Request):
+        class ListLanguagesSerializer(Serializer):
+            video_id = serializers.UUIDField()
+
+        serializer = ListLanguagesSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        video_id = serializer.validated_data["video_id"]
+        language_set = sorted(
+            set(
+                Subtitle.objects.filter(video_id=video_id).values_list(
+                    "language", flat=True
+                )
+            )
+        )
+        return Response(language_set, status=200)

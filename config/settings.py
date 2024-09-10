@@ -14,10 +14,6 @@ import os
 from ast import Try
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -67,6 +63,7 @@ INSTALLED_APPS = [
     *(OPTIONAL_APPS if DEBUG else []),
     *LOCAL_APPS,
 ]
+print(INSTALLED_APPS)
 
 OPTIONAL_MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -217,16 +214,10 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        "file_django": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/django.log",
-            "formatter": "verbose",
-        },
     },
     "loggers": {
         "src.video_processor": {
-            "handlers": ["console", "file_django"],
+            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
         },
