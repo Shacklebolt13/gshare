@@ -12,7 +12,7 @@ ENV YOUR_ENV=${YOUR_ENV} \
 
 #Install poetry on a global level
 RUN apt update
-RUN apt install -y curl
+RUN apt install -y curl ffmpeg
 RUN curl https://install.python-poetry.org | python3 -
 
 #Copy the poetry.lock and pyproject.toml files to the container

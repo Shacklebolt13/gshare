@@ -1,10 +1,13 @@
-from fileinput import filename
-import os
-import sys
-import subprocess
 import json
-from .parsers import src_parser
-from .extractor_base import ExtractorBase
+import logging
+import subprocess
+from fileinput import filename
+from sys import stdout
+
+from parsers import srt_parser
+
+from src.video_processor.dto.subtitles_dtos import Subtitles, SubtitleSet
+from src.video_processor.services.extractors.extractor_base import ExtractorBase
 
 LIST_STREAMS_COMMAND: str = (
     "ffprobe -v error -show_entries stream=index,codec_type -of json {filename}"
@@ -14,22 +17,43 @@ EXTRACT_STREAM_COMMAND: str = (
     "ffmpeg -i {filename} -map 0:s:{stream_id} -c copy -f srt -"
 )
 
+logger = logging.getLogger(__name__)
+
+
 class FfmpegExtractor(ExtractorBase):
 
-    def get_streams(self,filename: str) -> dict:
-        command = LIST_STREAMS_COMMAND.format(filename=filename)
+    def get_streams(self, absolute_file_path: str) -> dict:
+        logger.debug(f"fetching streams embedded into {absolute_file_path}")
+        command = LIST_STREAMS_COMMAND.format(filename=absolute_file_path)
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
         result.stdout.decode("utf-8")
+        logger.debug("found stream data, {}", result.stdout.replace(b"\n", b"\\n"))
         data = json.loads(result.stdout)
         return data
 
-    def extract_stream(self,filename: str, stream_id: int) -> list[dict]:
-        command = EXTRACT_STREAM_COMMAND.format(filename=filename, stream_id=stream_id)
+    def extract_stream(self, absolute_file_path: str, stream_id: int) -> Subtitles:
+        logger.info(f"Extracting stream by index {stream_id}")
+        command = EXTRACT_STREAM_COMMAND.format(
+            filename=absolute_file_path, stream_id=stream_id
+        )
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
-        return srt_parser.SrtParser(result.stdout.decode("utf-8")).to_dict()
+        logging.debug(
+            "found subtitles in stream 1 {}", result.stdout.replace(b"\n", b"\\n")
+        )
+        if stdout.errors:
+            logging.debug(
+                "found errors while processing ", result.stderr.replace(b"\n", b"\\n")
+            )
+        return srt_parser.SrtParser(result.stdout.decode("utf-8")).raw_data()
 
-    def extract_subtitle_set(self, filename: str) -> list[dict]:
-        subtitle_set_list = []
-        streams =self.get_streams()
+    def extract_subtitle_sets(self, absolute_file_path: str) -> list[SubtitleSet]:
+        streams = self.get_streams(absolute_file_path)
         stream_count = len(streams.get("streams", []))
-        return [self.extract_stream(filename,i) for i in range(self.count_streams(filename))]        
+        logging.info("found {} streams", stream_count)
+        return [
+            SubtitleSet(
+                language=f"Language {i}",
+                subtitles=self.extract_stream(absolute_file_path, i),
+            )
+            for i in range(stream_count)
+        ]
