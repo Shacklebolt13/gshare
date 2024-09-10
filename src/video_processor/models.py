@@ -27,7 +27,6 @@ class Video(models.Model):
         choices=ProcessingStatus.choices(),
     )
     log_file = models.FileField(null=True, blank=True)
-    srt_file = models.FileField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.title} - {self.status}"

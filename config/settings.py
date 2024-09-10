@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+from ast import Try
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -190,4 +191,44 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
+}
+
+# Write logging configuration
+# have console and file handlers. Both on DEBUG level
+# have separate files for celery and django, both on DEBUG level
+# supress logs from internal django modules
+# the log message must show level, file,function,line number and message
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime}|{levelname}|{module}.{funcName}@{lineno}: {message}",
+            "style": "{",
+        },
+        "worker": {
+            "format": "{task_id}|{asctime}|{levelname}|{module}.{funcName}@{lineno}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "file_django": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs/django.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "src.video_processor": {
+            "handlers": ["console", "file_django"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
 }

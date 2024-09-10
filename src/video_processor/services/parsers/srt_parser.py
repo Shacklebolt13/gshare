@@ -1,4 +1,5 @@
 import json
+from typing import Iterable
 
 from src.video_processor.dto.subtitles_dtos import (
     SubtitleChunk,
@@ -17,13 +18,25 @@ class SrtParser:
         self.__processed_data = self.__parse()
 
     def __parse(self):
-        sequences = self.__raw.split("\n\n")
-        return Subtitles([self.__parse_sequence(x.split("\n")) for x in sequences])
+        if not self.__raw:
+            return Subtitles([])
+        raw_chunks = self.__raw.split("\n\n")
+        parsed_chunks: list[SubtitleChunk] = []
 
-    def __parse_sequence(self, sequence: list[str]) -> SubtitleChunk:
-        print(sequence)
-        sequence_id, time_frame = sequence[:2]
-        subtitles = sequence[2:]
+        for raw_chunk in raw_chunks:
+            chunk_sections = filter(
+                lambda val: val != "",
+                map(lambda val: val.strip(), raw_chunk.strip().split("\n")),
+            )
+            parsed_chunks.append(self.__parse_raw_chunk(chunk_sections))
+
+        return Subtitles(parsed_chunks)
+
+    def __parse_raw_chunk(self, sequence: Iterable[str]) -> SubtitleChunk:
+        iterator = iter(sequence)
+        sequence_id = next(iterator)
+        time_frame = next(iterator)
+        subtitles = [*iterator]
         return SubtitleChunk(
             id=int(sequence_id),
             time_frame=self.__parse_time_frame(time_frame),

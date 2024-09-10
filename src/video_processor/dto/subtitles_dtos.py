@@ -8,6 +8,10 @@ class TimeStamp:
     secs: int
     millis: int
 
+    @property
+    def total_millis(self) -> int:
+        return self.hrs * 3600000 + self.mins * 60000 + self.secs * 1000 + self.millis
+
 
 @dataclass(kw_only=True)
 class TimeFrame:

@@ -12,12 +12,11 @@ class ListVideoApiView(ListAPIView, CreateAPIView):
     class VideoSerializer(ModelSerializer):
         class Meta:
             model = Video
-            fields = ["id", "status", "title", "file", "log_file", "srt_file"]
+            fields = ["id", "status", "title", "file", "log_file"]
             kwargs = {
                 "id": {"read_only": True},
                 "status": {"read_only": True},
                 "log_file": {"read_only": True},
-                "srt_file": {"read_only": True},
             }
 
     serializer_class = VideoSerializer
