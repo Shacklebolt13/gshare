@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-from ast import Try
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,7 +30,6 @@ ALLOWED_HOSTS = (
     ["*"] if DEBUG else os.environ.get("GSHARE_BE_ALLOWED_HOSTS", "").split(",")
 )
 
-
 # Application definition
 
 DJANGO_INTERNAL_APPS = [
@@ -48,11 +46,6 @@ THIRD_PARTY_APPS = [
     "celery",
     "django_celery_results",
 ]
-
-OPTIONAL_APPS = [
-    "debug_toolbar",
-]
-
 LOCAL_APPS = [
     "src.common",
     "src.video_processor",
@@ -60,13 +53,7 @@ LOCAL_APPS = [
 INSTALLED_APPS = [
     *DJANGO_INTERNAL_APPS,
     *THIRD_PARTY_APPS,
-    *(OPTIONAL_APPS if DEBUG else []),
     *LOCAL_APPS,
-]
-print(INSTALLED_APPS)
-
-OPTIONAL_MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 MIDDLEWARE = [
@@ -77,7 +64,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    *(OPTIONAL_MIDDLEWARE if DEBUG else []),
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -201,10 +187,6 @@ LOGGING = {
     "formatters": {
         "verbose": {
             "format": "{asctime}|{levelname}|{module}.{funcName}@{lineno}: {message}",
-            "style": "{",
-        },
-        "worker": {
-            "format": "{task_id}|{asctime}|{levelname}|{module}.{funcName}@{lineno}: {message}",
             "style": "{",
         },
     },

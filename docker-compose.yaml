@@ -41,6 +41,18 @@ services:
     ports:
       - "6379:6379"
 
+  nginx:
+    container_name: gshare-nginx
+    build:
+      context: nginx
+      dockerfile: ./Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
 
 volumes:
   db-data:

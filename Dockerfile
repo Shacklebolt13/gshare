@@ -23,6 +23,3 @@ WORKDIR /app
 RUN ls /usr/bin/
 # Install the dependencies
 RUN ${POETRY_HOME}/bin/poetry install --no-interaction --no-ansi
-
-#Copy the rest of the code to the container
-COPY . /app
