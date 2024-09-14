@@ -3,46 +3,37 @@
 {% endblock %} {% block content %}
 <div
   class="container-fluid border row"
-  style="
-    min-height: 90%;
-    padding: 0%;
-    margin: 0%;
-    overflow-y: hidden;
-    max-height: 90%;
-  "
+  style="max-height: 100%;padding: 0%;height: 100%;margin: 0%"
 >
   <div
     id="video-list"
     class="col border list-group"
     style="max-width: 20%; padding: 0%"
   >
-    <div class="text-center text-secondary">Select one to begin</div>
+    <div class="text-center text-secondary">
+      Select one to begin <br />
+      Refresh Page to fetch new videos
+    </div>
   </div>
-  <div class="col border" style="width: 80% padding:0%">
     <div
-      class="container border"
+      class="col container-fluid border"
       style="margin: 0%; height: 100%; max-height: 100%; overflow-y: hidden"
       id="main-area"
       hidden
     >
-      <span style="height: 50%; width: 100%">
+      <span class="container border" style="height: 50%; padding: 0%">
         <video-js
           id="video-player"
           class="video-js"
           controls
           preload="auto"
-          data-setup="{}"
         ></video-js>
       </span>
       <div
         class="container"
         style="height: 50%; padding: 0%; width: 100%;max-height:50% overflow-y: hidden"
       >
-        <nav
-          class="navbar"
-          style="padding: 0%; margin-top: 1%; margin-bottom: 1%"
-        >
-          <div class="container-fluid flex">
+          <div class="navbar container-fluid flex">
             <div class="d-flex">
               <a class="btn btn-outline-primary" id="logs-btn">Log file</a>
             </div>
@@ -64,21 +55,16 @@
               />
             </div>
           </div>
-        </nav>
-        <ul
-          id="subtitle-list"
-          class="list-group border"
-          style="
-            max-height: 80%;
-            width: 100%;
-            max-height: 80%;
-            overflow-y: scroll;
-          "
+        <div
+          class="container border"
+          style="height: 50%; padding: 0%; width: 100%; max-height: 50%;display: inline-table"
         >
-          <li class="list-group-item" style="width: 100%">
-            Select a video on the left side or create one
-          </li>
-        </ul>
+          <ul
+            id="subtitle-list"
+            class="list-group border"
+            style="height: 100%; width: 100%; overflow-y: auto"
+          ></ul>
+        </div>
       </div>
     </div>
   </div>
