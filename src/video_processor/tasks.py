@@ -24,17 +24,21 @@ def process_subtitles(video_id: uuid.UUID):
     logger.info(f"Recieved task request for video id : {video_id}")
     video_object = Video.objects.get(id=video_id)
     if not video_object:
-        logging.error(f"Video not found for id : {video_id}")
+        logger.error(f"Video not found for id : {video_id}")
         return
-    extractor_instance = FfmpegExtractor(str(video_id))
-    logger.info("Beginning to process Subtitles")
-    SubtitleProcessor(
-        video_object,
-        extractor_instance,
-    ).process_subtitles(video_object.id)
-    logger.info("Updating video status")
+    try:
+        extractor_instance = FfmpegExtractor(str(video_id))
+        logger.info("Beginning to process Subtitles")
+        SubtitleProcessor(
+            video_object,
+            extractor_instance,
+        ).process_subtitles(video_object.id)
+        logger.info("Updating video status")
+        video_object.log_file.name = relative_file_path
+    except Exception as e:
+        logger.error("Error while processing subtitles", e)
+
     video_object.status = ProcessingStatus.COMPLETED.value
-    video_object.log_file.name = relative_file_path
     video_object.save()
     logger.info("Completed processing subtitles")
 

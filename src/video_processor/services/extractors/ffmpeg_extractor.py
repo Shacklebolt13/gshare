@@ -1,18 +1,15 @@
 import json
 import logging
 import subprocess
-from sys import stdout
 
 from src.video_processor.dto.subtitles_dtos import Subtitles, SubtitleSet
 from src.video_processor.services.extractors.extractor_base import ExtractorBase
 from src.video_processor.services.parsers import srt_parser
 
-LIST_STREAMS_COMMAND: str = (
-    "ffprobe -v error -show_entries stream=index,codec_type -of json {filename}"
-)
+LIST_STREAMS_COMMAND: str = "ffprobe -v error -show_streams -of json {filename}"
 
 EXTRACT_STREAM_COMMAND: str = (
-    "ffmpeg -loglevel quiet -i {filename} -map 0:s:{stream_id} -c copy -f srt -"
+    "ffmpeg -loglevel info -i {filename} -map 0:s:{stream_id} -c copy -f srt -"
 )
 
 
@@ -24,7 +21,7 @@ class FfmpegExtractor(ExtractorBase):
         self.__logger = logging.getLogger(f"task-{video_id}")
 
     def get_streams(self, absolute_file_path: str) -> dict:
-        self.__logger.debug(f"fetching streams embedded into {absolute_file_path}")
+        self.__logger.info(f"fetching streams embedded into {absolute_file_path}")
         command = LIST_STREAMS_COMMAND.format(filename=absolute_file_path)
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
         result.stdout.decode("utf-8")
@@ -40,11 +37,11 @@ class FfmpegExtractor(ExtractorBase):
             filename=absolute_file_path, stream_id=stream_id
         )
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
-        logging.debug(
+        self.__logger.debug(
             "found subtitles in stream 1 %s", result.stdout.replace(b"\n", b"\\n")
         )
-        if result.stderr is not None:
-            logging.debug(
+        if result.stderr:
+            self.__logger.warning(
                 "found errors while processing ", result.stderr.replace(b"\n", b"\\n")
             )
         return srt_parser.SrtParser(result.stdout.decode("utf-8")).raw_data()
@@ -52,7 +49,7 @@ class FfmpegExtractor(ExtractorBase):
     def extract_subtitle_sets(self, absolute_file_path: str) -> list[SubtitleSet]:
         streams = self.get_streams(absolute_file_path)
         stream_count = len(streams.get("streams", []))
-        logging.info("found %s streams", stream_count)
+        self.__logger.info("found %s streams", stream_count)
         return [
             SubtitleSet(
                 language=f"Language {i}",

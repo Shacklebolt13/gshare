@@ -30,9 +30,7 @@
 ## How to run the Project ?
 Run the following command to start the project. `--build` ensures a fresh build of the project if any changes are made to the codebase.
 
-    ```
-    docker-compose up --build
-    ```
+    docker compose up --build
 
 ## How to access the project ?
 The project can be accessed at `http://localhost/` on your browser.
@@ -46,6 +44,6 @@ The project can be accessed at `http://localhost/` on your browser.
 ## *How to run tests ?
 To run the tests, you can run the following command.
 
-    docker-compose run backend python manage.py test
+    docker compose run backend python manage.py test
 
 ***NOTE :** This is not ready yet. The tests are not yet written.
