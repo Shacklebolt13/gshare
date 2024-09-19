@@ -46,4 +46,3 @@ To run the tests, you can run the following command.
 
     docker compose run backend python manage.py test
 
-***NOTE :** This is not ready yet. The tests are not yet written.
